@@ -36,6 +36,7 @@ pipeline
                     docker image build webapp/nginx-service/ -t nginx-service:latest
                     docker tag nginx-service ilhemb/nginx-service:latest
                     docker image push ilhemb/nginx-service:latest
+                    '''
                 }
             }
         }
