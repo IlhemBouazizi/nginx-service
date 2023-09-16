@@ -1,0 +1,254 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: {{ .Values.nameSpace }}
+spec:
+  replicas: {{ .Values.nginx.replicaCount }} 
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: {{ .Values.nginx.image.account }}/{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}
+          ports:
+            - containerPort: {{ .Values.nginx.service.targetPort }}
+      initContainers:
+        - name: init-nginx
+          image: busybox:1.28
+          command: ['sh', '-c', 'echo The gateway is running! && sleep 60']              
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: {{ .Values.nameSpace }}
+spec:
+  type: {{ .Values.nginx.service.type }}
+  selector:
+    app: nginx
+  ports:
+    - protocol: {{ .Values.nginx.service.protocol }}
+      port: {{ .Values.nginx.service.port }}
+      targetPort: {{ .Values.nginx.service.targetPort }}
+      nodePort: {{ .Values.nginx.service.nodePort }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie
+  namespace: {{ .Values.nameSpace }}
+spec:
+  replicas: {{ .Values.movie.replicaCount }}  
+  selector:
+    matchLabels:
+      app: movie
+  template:
+    metadata:
+      labels:
+        app: movie
+    spec:
+      containers:
+        - name: movie
+          image: {{ .Values.movie.image.account }}/{{ .Values.movie.image.repository }}:{{ .Values.movie.image.tag }}
+          command: ['sh', '-c', 'uvicorn app.main:app --reload --host 0.0.0.0 --port 8000']
+          ports:
+            - containerPort: {{ .Values.movie.service.targetPort }}
+          env:
+            - name: DATABASE_URI
+              value: {{ .Values.movie.env.dbUri }}
+            - name: CAST_SERVICE_HOST_URL
+              value: {{ .Values.movie.env.hostUrl }}
+          volumeMounts:
+            - name: movie-volume
+              mountPath: {{ .Values.movie.mountPath }}
+      volumes:
+        - name: movie-volume
+          hostPath:
+            path: {{ .Values.movie.hostPath }}
+      initContainers:
+        - name: init-movie
+          image: busybox:1.28
+          command: ['sh', '-c', 'echo The gateway is running! && sleep 30']                                      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: movie-service
+  namespace: {{ .Values.nameSpace }}
+spec:
+  type: {{ .Values.movie.service.type }}
+  selector:
+    app: movie
+  ports:
+    - protocol: {{ .Values.movie.service.protocol }}
+      port: {{ .Values.movie.service.port }}
+      targetPort: {{ .Values.movie.service.targetPort }}
+  clusterIP: {{ .Values.movie.service.clusterIP }}      
+---    
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cast
+  namespace: {{ .Values.nameSpace }}
+spec:
+  replicas: {{ .Values.cast.replicaCount }}  
+  selector:
+    matchLabels:
+      app: cast
+  template:
+    metadata:
+      labels:
+        app: cast
+    spec:
+      containers:
+        - name: cast
+          image: {{ .Values.cast.image.account }}/{{ .Values.cast.image.repository }}:{{ .Values.cast.image.tag }}
+          command: ['sh', '-c', 'uvicorn app.main:app --reload --host 0.0.0.0 --port 8000']
+          ports:
+            - containerPort: {{ .Values.cast.service.targetPort }}
+          env:
+            - name: DATABASE_URI
+              value: {{ .Values.cast.env.dbUri }}
+          volumeMounts:
+            - name: cast-volume
+              mountPath: {{ .Values.cast.mountPath }}
+      volumes:
+        - name: cast-volume
+          hostPath:
+            path: {{ .Values.cast.hostPath }}
+      initContainers:
+        - name: init-cast
+          image: busybox:1.28
+          command: ['sh', '-c', 'echo The gateway is running! && sleep 30']                                      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cast-service
+  namespace: {{ .Values.nameSpace }}
+spec:
+  type: {{ .Values.cast.service.type }}
+  selector:
+    app: cast
+  ports:
+    - protocol: {{ .Values.cast.service.protocol }}
+      port: {{ .Values.cast.service.port }}
+      targetPort: {{ .Values.cast.service.targetPort }}
+  clusterIP: {{ .Values.cast.service.clusterIP }}            
+---    
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie-db
+  namespace: {{ .Values.nameSpace }}
+spec:
+  replicas: {{ .Values.movieDB.replicaCount }}
+  selector:
+    matchLabels:
+      app: movie-db
+  template:
+    metadata:
+      labels:
+        app: movie-db
+    spec:
+      containers:
+        - name: movie-db
+          image: {{ .Values.movieDB.image.repository }}:{{ .Values.movieDB.image.tag }}
+          ports:
+            - containerPort: {{ .Values.movieDB.service.targetPort }}
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: movie-secret
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: movie-secret
+                  key: password
+            - name: POSTGRES_DB
+              value: {{ .Values.movieDB.env.dbName }}
+          volumeMounts:
+            - name: movie-volume
+              mountPath: {{ .Values.movieDB.mountPath }}
+      volumes:
+        - name: movie-volume
+          hostPath:
+            path: {{ .Values.movieDB.hostPath }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: movie-db-service
+  namespace: {{ .Values.nameSpace }}
+spec:
+  type: {{ .Values.movieDB.service.type }}
+  selector:
+    app: movie-db
+  ports:
+    - protocol: {{ .Values.movieDB.service.protocol }}
+      port: {{ .Values.movieDB.service.port }}
+      targetPort: {{ .Values.movieDB.service.targetPort }}
+---    
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cast-db
+  namespace: {{ .Values.nameSpace }}
+spec:
+  replicas: {{ .Values.castDB.replicaCount }}  
+  selector:
+    matchLabels:
+      app: cast-db
+  template:
+    metadata:
+      labels:
+        app: cast-db
+    spec:
+      containers:
+        - name: cast-db
+          image: {{ .Values.castDB.image.repository }}:{{ .Values.castDB.image.tag }}
+          ports:
+            - containerPort: {{ .Values.castDB.service.targetPort }}
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cast-secret
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cast-secret
+                  key: password
+            - name: POSTGRES_DB
+              value: {{ .Values.castDB.env.dbName }}
+          volumeMounts:
+            - name: cast-volume
+              mountPath: {{ .Values.castDB.mountPath }}
+      volumes:
+        - name: cast-volume
+          hostPath:
+            path: {{ .Values.castDB.hostPath }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cast-db-service
+  namespace: {{ .Values.nameSpace }}
+spec:
+  type: {{ .Values.castDB.service.type }}
+  selector:
+    app: cast-db
+  ports:
+    - protocol: {{ .Values.castDB.service.protocol }}
+      port: {{ .Values.castDB.service.port }}
+      targetPort: {{ .Values.castDB.service.targetPort }}
+

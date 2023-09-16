@@ -1,0 +1,82 @@
+nameSpace: helm
+
+nginx:
+  replicaCount: 1
+  image:
+    account: ilhemb
+    repository: nginx-service
+    tag: latest
+  service:
+    type: NodePort
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+    nodePort: 30010
+
+movie:
+  replicaCount: 1
+  mountPath: /movie-service/
+  hostPath: /app    
+  image:
+    account: ilhemb
+    repository: movie-service
+    tag: latest
+  env:
+    dbUri: postgresql://movie_db_username:movie_db_password@movie_db/movie_db_dev
+    hostUrl: http://cast_service:8000/api/v1/casts/ 
+  service:
+    type: ClusterIP
+    protocol: TCP
+    port: 8001
+    targetPort: 8000
+    clusterIP: 10.43.60.1
+
+cast:
+  replicaCount: 1
+  mountPath: /cast-service/
+  hostPath: /app    
+  image:
+    account: ilhemb
+    repository: cast-service
+    tag: latest
+  env:
+    dbUri: postgresql://cast_db_username:cast_db_password@cast_db/cast_db_dev
+  service:
+    type: ClusterIP
+    protocol: TCP
+    port: 8002
+    targetPort: 8000
+    clusterIP: 10.43.60.2   
+
+movieDB:
+  replicaCount: 1
+  mountPath: postgres_data_movie
+  hostPath: /var/lib/postgresql/data/
+  image:
+    repository: postgres
+    tag: 12.1-alpine
+  env:
+    dbName: movie_db_dev
+  service:
+    type: ClusterIP
+    protocol: TCP
+    port: 5432
+    targetPort: 5432
+
+castDB:
+  replicaCount: 1
+  mountPath: postgres_data_cast
+  hostPath: /var/lib/postgresql/data/
+  image:
+    repository: postgres
+    tag: 12.1-alpine
+  env:
+    dbName: cast_db_dev
+  service:
+    type: ClusterIP
+    protocol: TCP
+    port: 5432
+    targetPort: 5432    
+
+
+  
