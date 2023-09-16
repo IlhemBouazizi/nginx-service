@@ -48,8 +48,6 @@ pipeline
                 NAMESPACE = 'dev'
                 CHARTNAME = 'nginx-microservice-dev'                
                 NODEPORT_NGINX = '30000'
-                CLUSTERIP_MOVIE = '10.43.50.0'
-                CLUSTERIP_CAST = '10.43.50.1'
             }
             steps 
             {
@@ -57,7 +55,7 @@ pipeline
                 {
                     sh '''
                     cat $KUBECONFIG > k8s_config
-                    helm upgrade --kubeconfig k8s_config --install $CHARTNAME  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE"  --set nginx.service.nodePort="$NODEPORT_NGINX" --set movie.service.clusterIP="$CLUSTERIP_MOVIE" --set cast.service.clusterIP="$CLUSTERIP_CAST"
+                    helm upgrade --kubeconfig k8s_config --install $CHARTNAME  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE"  --set nginx.service.nodePort="$NODEPORT_NGINX" 
                     '''
                 }
             }
@@ -87,8 +85,6 @@ pipeline
                 NAMESPACE = 'qa'
                 CHARTNAME = 'nginx-microservice-qa'                
                 NODEPORT_NGINX = '30001'
-                CLUSTERIP_MOVIE = '10.43.51.0'
-                CLUSTERIP_CAST = '10.43.51.1'
             }
             steps 
             {
@@ -96,7 +92,7 @@ pipeline
                 {
                     sh '''
                     cat $KUBECONFIG > k8s_config
-                    helm upgrade --kubeconfig k8s_config --install $CHARTNAME  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE"  --set nginx.service.nodePort="$NODEPORT_NGINX" --set movie.service.clusterIP="$CLUSTERIP_MOVIE" --set cast.service.clusterIP="$CLUSTERIP_CAST"
+                    helm upgrade --kubeconfig k8s_config --install $CHARTNAME  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE"  --set nginx.service.nodePort="$NODEPORT_NGINX" 
                     '''
                 }
             }
@@ -126,8 +122,6 @@ pipeline
                 NAMESPACE = 'staging'
                 CHARTNAME = 'nginx-microservice-staging'                
                 NODEPORT_NGINX = '30002'
-                CLUSTERIP_MOVIE = '10.43.52.0'
-                CLUSTERIP_CAST = '10.43.52.1'
             }
             steps 
             {
@@ -135,7 +129,7 @@ pipeline
                 {
                     sh '''
                     cat $KUBECONFIG > k8s_config
-                    helm upgrade --kubeconfig k8s_config --install $CHARTNAME  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE"  --set nginx.service.nodePort="$NODEPORT_NGINX" --set movie.service.clusterIP="$CLUSTERIP_MOVIE" --set cast.service.clusterIP="$CLUSTERIP_CAST"
+                    helm upgrade --kubeconfig k8s_config --install $CHARTNAME  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE"  --set nginx.service.nodePort="$NODEPORT_NGINX" 
                     '''
                 }
             }
@@ -173,8 +167,6 @@ pipeline
                 NAMESPACE = 'prod'
                 CHARTNAME = 'nginx-microservice-prod'                
                 NODEPORT_NGINX = '30003'
-                CLUSTERIP_MOVIE = '10.43.53.0'
-                CLUSTERIP_CAST = '10.43.53.1'
             }
             steps 
             {
@@ -182,7 +174,7 @@ pipeline
                 {
                     sh '''
                     cat $KUBECONFIG > k8s_config
-                    helm upgrade --kubeconfig k8s_config --install $CHARTNAME  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE"  --set nginx.service.nodePort="$NODEPORT_NGINX" --set movie.service.clusterIP="$CLUSTERIP_MOVIE" --set cast.service.clusterIP="$CLUSTERIP_CAST"
+                    helm upgrade --kubeconfig k8s_config --install $CHARTNAME  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE"  --set nginx.service.nodePort="$NODEPORT_NGINX" 
                     '''
                 }
             }
