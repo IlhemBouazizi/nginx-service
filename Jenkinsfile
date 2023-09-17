@@ -121,9 +121,9 @@ pipeline
             environment
             {
                 KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
-                NAMESPACE = 'dev'
-                NODEPORT = '30100'
-                TARGETPORT = '8000'
+                NAMESPACE = 'staging'
+                NODEPORT = '30102'
+                TARGETPORT = '8002'
             }
             steps 
             {
@@ -140,7 +140,7 @@ pipeline
         {    
             environment
             {
-                NODEPORT = '30100'
+                NODEPORT = '30102'
             }
             steps 
             {
@@ -156,12 +156,20 @@ pipeline
         }
         stage('Deploiement en prod')
         {
+            when 
+            {
+                branch 'master'
+            }
+            input
+            {
+                message "Confirmer le deployment en prod"
+            }            
             environment
             {
                 KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
-                NAMESPACE = 'dev'
-                NODEPORT = '30100'
-                TARGETPORT = '8000'
+                NAMESPACE = 'prod'
+                NODEPORT = '30103'
+                TARGETPORT = '8003'
             }
             steps 
             {
@@ -176,9 +184,17 @@ pipeline
         }
         stage('Test deploiement en prod')
         {    
+            when 
+            {
+                branch 'master'
+            }
+            input
+            {
+                message "Confirmer le test en prod"
+            }                        
             environment
             {
-                NODEPORT = '30100'
+                NODEPORT = '30103'
             }
             steps 
             {
