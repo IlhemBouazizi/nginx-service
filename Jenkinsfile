@@ -46,8 +46,8 @@ pipeline
             {
                 KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
                 NAMESPACE = 'dev'
-                CHARTNAME = 'nginx-microservice-dev'                
-                NODEPORT_NGINX = '30000'
+                NODEPORT = '30100'
+                TARGETPORT = '8000'
             }
             steps 
             {
@@ -55,7 +55,7 @@ pipeline
                 {
                     sh '''
                     cat $KUBECONFIG > k8s_config
-                    helm upgrade --kubeconfig k8s_config --install $CHARTNAME  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE"  --set nginx.service.nodePort="$NODEPORT_NGINX" 
+                    helm upgrade --kubeconfig k8s_config --install nginx-microservice-$NAMESPACE  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE" --set nginx.service.nodePort="$NODEPORT" --set nginx.service.targetPort="$TARGETPORT" --set nginx.service.port="$TARGETPORT"
                     '''
                 }
             }
@@ -64,15 +64,16 @@ pipeline
         {    
             environment
             {
-                NODEPORT_NGINX = '30000'
+                NODEPORT = '30100'
             }
             steps 
             {
                 script 
                 {
                     sh '''
-                    sleep 90
-                    curl "http://localhost:$NODEPORT_NGINX"
+                    sleep 70
+                    curl "http://localhost:$NODEPORT/api/v1/movies/docs"
+                    curl "http://localhost:$NODEPORT/api/v1/casts/docs"
                     '''
                 }
             }            
@@ -83,8 +84,8 @@ pipeline
             {
                 KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
                 NAMESPACE = 'qa'
-                CHARTNAME = 'nginx-microservice-qa'                
-                NODEPORT_NGINX = '30001'
+                NODEPORT = '30101'
+                TARGETPORT = '8001'
             }
             steps 
             {
@@ -92,7 +93,7 @@ pipeline
                 {
                     sh '''
                     cat $KUBECONFIG > k8s_config
-                    helm upgrade --kubeconfig k8s_config --install $CHARTNAME  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE"  --set nginx.service.nodePort="$NODEPORT_NGINX" 
+                    helm upgrade --kubeconfig k8s_config --install nginx-microservice-$NAMESPACE  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE" --set nginx.service.nodePort="$NODEPORT" --set nginx.service.targetPort="$TARGETPORT" --set nginx.service.port="$TARGETPORT"
                     '''
                 }
             }
@@ -101,15 +102,16 @@ pipeline
         {    
             environment
             {
-                NODEPORT_NGINX = '30001'
+                NODEPORT = '30101'
             }
             steps 
             {
                 script 
                 {
                     sh '''
-                    sleep 90
-                    curl "http://localhost:$NODEPORT_NGINX"
+                    sleep 70
+                    curl "http://localhost:$NODEPORT/api/v1/movies/docs"
+                    curl "http://localhost:$NODEPORT/api/v1/casts/docs"
                     '''
                 }
             }            
@@ -119,9 +121,9 @@ pipeline
             environment
             {
                 KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
-                NAMESPACE = 'staging'
-                CHARTNAME = 'nginx-microservice-staging'                
-                NODEPORT_NGINX = '30002'
+                NAMESPACE = 'dev'
+                NODEPORT = '30100'
+                TARGETPORT = '8000'
             }
             steps 
             {
@@ -129,7 +131,7 @@ pipeline
                 {
                     sh '''
                     cat $KUBECONFIG > k8s_config
-                    helm upgrade --kubeconfig k8s_config --install $CHARTNAME  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE"  --set nginx.service.nodePort="$NODEPORT_NGINX" 
+                    helm upgrade --kubeconfig k8s_config --install nginx-microservice-$NAMESPACE  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE" --set nginx.service.nodePort="$NODEPORT" --set nginx.service.targetPort="$TARGETPORT" --set nginx.service.port="$TARGETPORT"
                     '''
                 }
             }
@@ -138,35 +140,28 @@ pipeline
         {    
             environment
             {
-                NODEPORT_NGINX = '30002'
+                NODEPORT = '30100'
             }
             steps 
             {
                 script 
                 {
                     sh '''
-                    sleep 90
-                    curl "http://localhost:$NODEPORT_NGINX"
+                    sleep 70
+                    curl "http://localhost:$NODEPORT/api/v1/movies/docs"
+                    curl "http://localhost:$NODEPORT/api/v1/casts/docs"
                     '''
                 }
             }            
         }
         stage('Deploiement en prod')
         {
-            when 
-            {
-                branch 'master'
-            }            
-            input
-            {
-                message "Confirmer le deployment en prod"
-            }
             environment
             {
                 KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
-                NAMESPACE = 'prod'
-                CHARTNAME = 'nginx-microservice-prod'                
-                NODEPORT_NGINX = '30003'
+                NAMESPACE = 'dev'
+                NODEPORT = '30100'
+                TARGETPORT = '8000'
             }
             steps 
             {
@@ -174,7 +169,7 @@ pipeline
                 {
                     sh '''
                     cat $KUBECONFIG > k8s_config
-                    helm upgrade --kubeconfig k8s_config --install $CHARTNAME  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE"  --set nginx.service.nodePort="$NODEPORT_NGINX" 
+                    helm upgrade --kubeconfig k8s_config --install nginx-microservice-$NAMESPACE  helm/nginx-microservice/ --values=helm/nginx-microservice/values.yaml --set nameSpace="$NAMESPACE" --set nginx.service.nodePort="$NODEPORT" --set nginx.service.targetPort="$TARGETPORT" --set nginx.service.port="$TARGETPORT"
                     '''
                 }
             }
@@ -183,19 +178,19 @@ pipeline
         {    
             environment
             {
-                NODEPORT_NGINX = '30003'
+                NODEPORT = '30100'
             }
-            
             steps 
             {
                 script 
                 {
                     sh '''
-                    sleep 90
-                    curl "http://localhost:$NODEPORT_NGINX"
+                    sleep 70
+                    curl "http://localhost:$NODEPORT/api/v1/movies/docs"
+                    curl "http://localhost:$NODEPORT/api/v1/casts/docs"
                     '''
                 }
             }            
-        }        
+        }
     }
 }
